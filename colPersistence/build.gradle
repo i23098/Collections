@@ -1,0 +1,27 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+def props = new Properties()
+file("postgres.properties").withInputStream { props.load(it) }
+
+task copyDBSqlReplaceTokens(type: Copy) {
+    from 'src/main/db'
+    into (new java.io.File(project.buildDir, 'db'))
+    include '**/*.sql'
+    filter(ReplaceTokens, tokens: props)
+    filteringCharset = 'UTF-8'
+    fileMode 0640
+}
+
+task copyDBShReplaceTokens(type: Copy) {
+    from 'src/main/db'
+    into (new java.io.File(project.buildDir, 'db'))
+    include '**/*.sh'
+    filter(ReplaceTokens, tokens: props)
+    filteringCharset = 'UTF-8'
+    fileMode 0750
+}
+
+task copyDBFiles {
+    dependsOn 'copyDBSqlReplaceTokens'
+    dependsOn 'copyDBShReplaceTokens'
+}
